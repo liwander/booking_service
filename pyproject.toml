@@ -1,0 +1,20 @@
+[project]
+name = "booking-service"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Anver Gadzhiev",email = "gadzhiev.anver@gmail.com"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi",
+    "uvicorn"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode=false
