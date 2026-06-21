@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends
 from app.schemas.time_slots import TimeSlot, TimeSlotCreate
+from app.core.database import get_db_session
 
 router = APIRouter(
     prefix='/slots',
