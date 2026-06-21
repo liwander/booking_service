@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, Depends
-from app.schemas.time_slots import TimeSlot
+from app.schemas.time_slots import TimeSlot, TimeSlotCreate
 
 router = APIRouter(
     prefix='/slots',
@@ -21,20 +21,19 @@ async def get_slots():
 
 @router.post('', response_model=TimeSlot, status_code=201)
 async def create_slot(
-    start_time: datetime,
-    end_time: datetime
+    tslot: TimeSlotCreate
 ) -> TimeSlot:
     '''
     Create a new time slot
     '''
 
-    if end_time <= start_time:
-        raise HTTPException(status_code=400, detail='End date must be strictly after start_date')
+    # if end_time <= start_time:
+    #     raise HTTPException(status_code=400, detail='End date must be strictly after start_date')
     slot_id = len(SLOTS_DB) + 1
     new_tslot = TimeSlot(
         id=slot_id,
-        start_time = start_time,
-        end_time = end_time,
+        start_time = tslot.start_time,
+        end_time = tslot.end_time,
         is_booked = False,
         booked_by = None 
     )
