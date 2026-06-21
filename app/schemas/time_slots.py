@@ -7,16 +7,7 @@ class TimeSlot(BaseModel):
     start_time: datetime
     end_time: datetime
     is_booked : bool = False
-    booked_by : str | None = Field(min_length=3, default=None)
-
-    def __hash__(self):
-        return hash((self.id, self.booked_by))
-
-    def __eq__(self, other):
-        if not isinstance(other, TimeSlot):
-            return NotImplemented
-        return self.id == other.id and self.id == other.booked_by
-    
+    booked_by : str | None = Field(min_length=3, default=None)    
 
 class TimeSlotCreate(BaseModel):
     start_time: datetime
