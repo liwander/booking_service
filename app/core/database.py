@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import AsyncGenerator, Annotated
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 load_dotenv()
 
@@ -20,7 +21,7 @@ engine = create_async_engine(
 
 async_sesion_factory = async_sessionmaker(
     bind=engine,
-    class_=AsycnSession,
+    class_=AsyncSession,
     expire_on_commit = False
 )
 

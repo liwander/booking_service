@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, ForeignKey
 from datetime import datetime
 from typing import Optional
+from sqlalchemy import DateTime
 
 class Base(DeclarativeBase):
     pass
@@ -11,7 +12,7 @@ class TimeSlot(Base):
     __tablename__ = 'time_slot'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    start_time: Mapped[datetime]
-    end_time: Mapped[datetime]
+    start_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    end_time: Mapped[datetime]= mapped_column(DateTime(timezone=True))
     is_booked : Mapped[bool] = mapped_column(default=False)
     booked_by : Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
