@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from app.schemas.time_slots import TimeSlot
 
 router = APIRouter(
@@ -42,28 +42,28 @@ async def create_slot(
 
     return new_tslot
 
-@router.patch('', response_model=TimeSlot)
-async def book_slot(
-    id: int,
-    booked_by: Annotated[str, Query(min_length=3)]) -> TimeSlot:
-    '''
-    Book a time slot
-    '''
-
-    check_if_slots_exists(id, SLOTS_DB)
-    
-    SLOTS_DB[id].booked_by = booked_by
-    SLOTS_DB[id].is_booked = True
+async def get_slot_or_404(id: int) -> TimeSlot:
+    if not id in SLOTS_DB:
+        raise HTTPException(status_code=404
+            ,detail='No such time slot available')
 
     return SLOTS_DB[id]
 
+@router.patch('', response_model=TimeSlot)
+async def book_slot(
+    booked_by: Annotated[str, Query(min_length=3)],
+    slot: TimeSlot = Depends(get_slot_or_404)) -> TimeSlot:
+    '''
+    Book a time slot
+    '''
+    
+    slot.booked_by = booked_by
+    slot.is_booked = True
+
+    return slot
+
 @router.delete('', status_code=204)
-async def remove_timeslot(id: int):
-    check_if_slots_exists(id, SLOTS_DB)
-
-    SLOTS_DB.pop(id, None)
-
-def check_if_slots_exists(id: int, db: dict[int, TimeSlot]):
-    if not id in db:
-        raise HTTPException(status_code=404
-            ,detail='No such time slot available')
+async def remove_timeslot(
+    slot: TimeSlot = Depends(get_slot_or_404)
+):
+    SLOTS_DB.pop(slot.id, None)
