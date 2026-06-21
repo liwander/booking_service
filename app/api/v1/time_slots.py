@@ -8,7 +8,7 @@ router = APIRouter(
     tags=['Slots']
 )
 
-SLOTS_DB: list[TimeSlot] = []
+SLOTS_DB: set[TimeSlot] = set()
 
 @router.get('', response_model=list[TimeSlot])
 async def get_slots():
@@ -27,9 +27,9 @@ async def create_slot(
     Create a new time slot
     '''
 
-    if end_tiem <= start_time:
+    if end_time <= start_time:
         raise HTTPException(status_code=400, detail='End date must be strictly after start_date')
-    slot_id = len(slots) + 1
+    slot_id = len(SLOTS_DB) + 1
     new_tslot = TimeSlot(
         id=slot_id,
         start_time = start_time,
@@ -37,6 +37,6 @@ async def create_slot(
         is_booked = False,
         booked_by = None 
     )
-    SLOTS_DB.append(new_tslot)
+    SLOTS_DB.add(new_tslot)
 
     return new_tslot
