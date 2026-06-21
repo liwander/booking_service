@@ -1,9 +1,6 @@
-import asyncio
-# from sqlalchemy import select
 import os
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemt.orm import DeclarativeBase
+
 load_dotenv()
 
 POSTGRES_DB=os.getenv('POSTGRES_DB')
