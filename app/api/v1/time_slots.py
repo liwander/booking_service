@@ -49,7 +49,7 @@ async def get_slot_or_404(id: int) -> TimeSlot:
 
     return SLOTS_DB[id]
 
-@router.patch('', response_model=TimeSlot)
+@router.patch('/{id}', response_model=TimeSlot)
 async def book_slot(
     booked_by: Annotated[str, Query(min_length=3)],
     slot: TimeSlot = Depends(get_slot_or_404)) -> TimeSlot:
@@ -62,7 +62,7 @@ async def book_slot(
 
     return slot
 
-@router.delete('', status_code=204)
+@router.delete('/{id}', status_code=204)
 async def remove_timeslot(
     slot: TimeSlot = Depends(get_slot_or_404)
 ):
