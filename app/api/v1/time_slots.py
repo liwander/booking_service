@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from app.schemas.time_slots import TimeSlot, TimeSlotCreate
 from app.core.database import get_db_session, SessionDep
 from app.models.timeslots import TimeSlot as TimeSlotModel
+from sqlalchemy import select
 
 router = APIRouter(
     prefix='/slots',
@@ -14,12 +15,13 @@ router = APIRouter(
 SLOTS_DB: dict[int, TimeSlot] = dict()
 
 @router.get('', response_model=list[TimeSlot])
-async def get_slots():
+async def get_slots(db: SessionDep) -> list[TimeSlot]:
     '''
     Get all time slots.
     '''
-
-    return SLOTS_DB.values()
+    query = select(TimeSlotModel)
+    res = await db.execute(query)
+    return res.scalars().all()
 
 @router.post('', response_model=TimeSlot, status_code=201)
 async def create_slot(
