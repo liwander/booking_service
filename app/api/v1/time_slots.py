@@ -45,17 +45,21 @@ async def create_slot(
     
     return new_tslot
 
-async def get_slot_or_404(id: int) -> TimeSlot:
-    if not id in SLOTS_DB:
+async def get_slot_or_404(id: int, db: SessionDep) -> TimeSlot:
+    slot = await db.get(TimeSlotModel, id)
+    if not slot:
+    # if not id in SLOTS_DB:
         raise HTTPException(status_code=404
             ,detail='No such time slot available')
 
-    return SLOTS_DB[id]
+    return slot
 
 @router.patch('/{id}', response_model=TimeSlot)
 async def book_slot(
+    db: SessionDep,
     booked_by: Annotated[str, Query(min_length=3)],
-    slot: TimeSlot = Depends(get_slot_or_404)) -> TimeSlot:
+    slot: TimeSlot = Depends(get_slot_or_404)
+) -> TimeSlot:
     '''
     Book a time slot
     '''
@@ -63,10 +67,14 @@ async def book_slot(
     slot.booked_by = booked_by
     slot.is_booked = True
 
+    await db.commit()
+    await db.refresh(slot)
     return slot
 
 @router.delete('/{id}', status_code=204)
 async def remove_timeslot(
+    db: SessionDep,
     slot: TimeSlot = Depends(get_slot_or_404)
 ):
-    SLOTS_DB.pop(slot.id, None)
+    await  db.delete(slot)
+    await db.commit()
