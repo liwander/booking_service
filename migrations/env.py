@@ -3,11 +3,14 @@ from logging.config import fileConfig
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import async_engine_from_config, create_async_engine
 from sqlalchemy import URL, make_url
 from alembic import context
 from app.models.timeslots import Base
 import os
+from dotenv import load_dotenv
+
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -65,7 +68,7 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-
+    load_dotenv()
     db_url_parts = [
     os.getenv('POSTGRES_HOST'),
     os.getenv('POSTGRES_PORT'),
@@ -74,29 +77,34 @@ async def run_async_migrations() -> None:
     os.getenv('POSTGRES_DB'),
     os.getenv('POSTGRES_DRIVER_NAME')
 ]
+    if not all(db_url_parts):
+        print(db_url_parts)
+        raise ValueError('Missing database connection parameters')\
 
-    if all(db_url_parts):
-        sqlalchemy_url = URL.create(
+    sqlalchemy_url = URL.create(
             drivername=os.getenv('POSTGRES_DRIVER_NAME'),
             username=os.getenv('POSTGRES_USER'),
             password=os.getenv('POSTGRES_PASSWORD'),
             host=os.getenv('POSTGRES_HOST'),
             port=int(os.getenv('POSTGRES_PORT')),
             database=os.getenv('POSTGRES_DB'),
-        )
-        stringified_sqlalchemy_url = sqlalchemy_url.render_as_string(
-            hide_password=False
-        )
-        percent_replaced_url = stringified_sqlalchemy_url.replace("%", "%%")
+    )
+    stringified_sqlalchemy_url = sqlalchemy_url.render_as_string(
+        hide_password=False
+    )
+    percent_replaced_url = stringified_sqlalchemy_url.replace("%", "%%")
 
-        config.set_main_option('sqlalchemy.url', percent_replaced_url)
+    config.set_main_option('sqlalchemy.url', percent_replaced_url)
     
-    connectable = async_engine_from_config(
-            config.get_section(config.config_ini_section, {}),
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-        )
+    # connectable = async_engine_from_config(
+    #         config.get_section(config.config_ini_section, {}),
+    #         prefix="sqlalchemy.",
+    #         poolclass=pool.NullPool,
+    #     )
 
+    connectable = create_async_engine(
+        percent_replaced_url, poolclass=pool.NullPool,
+    )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
 
